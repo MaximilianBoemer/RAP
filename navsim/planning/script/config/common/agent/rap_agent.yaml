@@ -17,5 +17,6 @@ config:
   cache_data: False
   train_metric_cache_path: './train_metric_cache'
 
-checkpoint_path: ''
+# checkpoint_path: ''
+checkpoint_path: '/n/fs/pci-sharedt/data_processed/gensim/policies/RAP/RAP_DINO_waymo_seed1.ckpt'
 lr: 1e-4

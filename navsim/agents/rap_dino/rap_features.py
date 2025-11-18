@@ -51,7 +51,7 @@ class RAPFeatureBuilder(AbstractFeatureBuilder):
             acceleration = torch.tensor(ego_status.ego_acceleration, dtype=torch.float32)
             driving_command = torch.tensor(ego_status.driving_command, dtype=torch.float32)
 
-            ego_feature=torch.cat([pose,velocity, acceleration, driving_command], dim=-1)
+            ego_feature=torch.cat([pose, velocity, acceleration, driving_command], dim=-1)
             ego_feature_list.append(ego_feature)
 
         features["ego_status"] =torch.stack(ego_feature_list)

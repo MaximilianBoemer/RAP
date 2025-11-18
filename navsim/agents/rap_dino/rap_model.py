@@ -144,13 +144,13 @@ class RAPModel(nn.Module):
         output["agent_labels"]=agent_labels
         output["bev_feature"]=image_feature[0].permute(2,0,1,3)
 
-        lambda_ = self.lambda_scheduler(self.progress)
-        feat = image_feature[0][[1]]   
-        feat_grad = feat[:,:,:self.batch_size].detach()          
-        feat_no_grad = feat[:,:,self.batch_size:]   
-        mixed_feat = torch.cat([feat_grad, feat_no_grad], dim=2)
-        domain_logits = self.domain_classifier(mixed_feat, lambd=lambda_)  # (B,)
-        output["domain_logits"] = domain_logits
+        # lambda_ = self.lambda_scheduler(self.progress)
+        # feat = image_feature[0][[1]]   
+        # feat_grad = feat[:,:,:self.batch_size].detach()          
+        # feat_no_grad = feat[:,:,self.batch_size:]   
+        # mixed_feat = torch.cat([feat_grad, feat_no_grad], dim=2)
+        # domain_logits = self.domain_classifier(mixed_feat, lambd=lambda_)  # (B,)
+        # output["domain_logits"] = domain_logits
 
         if pred_logit2 is not None:
             pdm_score=(torch.sigmoid(pred_logit)+torch.sigmoid(pred_logit2))[:,:,-1]/2
