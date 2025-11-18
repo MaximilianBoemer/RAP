@@ -1,3 +1,4 @@
+import time
 from typing import Any, List, Dict, Union
 
 import numpy as np
@@ -39,7 +40,8 @@ class RAPAgent(AbstractAgent):
         if not cache_data:
             self._rap_model = RAPModel(config)
 
-        if not cache_data:#only for training
+        if False:
+        # if not cache_data:#only for training
             self.bce_logit_loss = nn.BCEWithLogitsLoss()
             self.b2d = config.b2d
 
@@ -81,11 +83,12 @@ class RAPAgent(AbstractAgent):
 
     def init_from_pretrained(self):
         # import ipdb; ipdb.set_trace()
+        start = time.time()
         if self._checkpoint_path:
             if torch.cuda.is_available():
-                checkpoint = torch.load(self._checkpoint_path)
+                checkpoint = torch.load(self._checkpoint_path, weights_only=True)
             else:
-                checkpoint = torch.load(self._checkpoint_path, map_location=torch.device('cpu'))
+                checkpoint = torch.load(self._checkpoint_path, map_location=torch.device('cpu'), weights_only=True)
             
             state_dict = checkpoint['state_dict']
             
@@ -100,6 +103,7 @@ class RAPAgent(AbstractAgent):
                 print(f"Unexpected keys when loading pretrained weights: {unexpected_keys}")
         else:
             print("No checkpoint path provided. Initializing from scratch.")
+        print("Initialized from pretrained model in {:.1f} seconds".format(time.time() - start))
 
     def name(self) -> str:
         """Inherited, see superclass."""
@@ -142,8 +146,9 @@ class RAPAgent(AbstractAgent):
         return [RAPFeatureBuilder(config=self._config)]
 
     def forward(self, features: Dict[str, torch.Tensor],targets=None,return_score=False) -> Dict[str, torch.Tensor]:
-        ego_vel = features['ego_status'][:,-1,3:5]
+
         if targets:
+            ego_vel = features['ego_status'][:,-1,3:5]
             targets['initial_speed'] = torch.norm(ego_vel, dim=-1)
         return self._rap_model(features,targets,return_score)
 

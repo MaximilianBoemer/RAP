@@ -136,6 +136,7 @@ def main(cfg: DictConfig) -> None:
         }
         for log_file, tokens_list in scene_loader.get_tokens_list_per_log().items()
     ]
+    breakpoint()
     from nuplan.planning.utils.multithreading.worker_pool import Task
     from nuplan.planning.utils.multithreading.worker_ray import RayDistributed
     from math import ceil

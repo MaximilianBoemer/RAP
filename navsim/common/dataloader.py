@@ -109,6 +109,7 @@ def filter_scenes(data_path: Path, scene_filter: SceneFilter, enable_filter: boo
                 continue
 
             scene_dict_list = pickle.load(open(log_pickle_path, "rb"))
+            breakpoint()
             for frame_list in split_list(scene_dict_list, scene_filter.num_frames, scene_filter.frame_interval):
                 # Filter scenes which are too short
                 if len(frame_list) < scene_filter.num_frames:
