@@ -36,7 +36,10 @@ class ImgEncoder(nn.Module):
         #                                num_classes=0,
         #                                )
         #self.img_backbone = AutoModel.from_pretrained("facebook/dinov3-vitb16-pretrain-lvd1689m")
-        self.img_backbone = AutoModel.from_pretrained("facebook/dinov3-vith16plus-pretrain-lvd1689m")
+        self.img_backbone = AutoModel.from_pretrained(
+            "facebook/dinov3-vith16plus-pretrain-lvd1689m",
+            cache_dir="/n/fs/pci-sharedt/data_processed/gensim/policies/RAP/pretrained_ckpts"
+        )
         self.transform = make_transform(512)
                                        
         # self.bridge = nn.Sequential(

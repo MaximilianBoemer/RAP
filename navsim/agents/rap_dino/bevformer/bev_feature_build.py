@@ -33,7 +33,8 @@ def LoadMultiViewImageFromFiles(agent_input,synthetic=False):
                 validity = torch.tensor(True)
             else:
                 img = cam.image.astype(np.float32)
-                validity = torch.tensor(cam.real_valid)
+                validity = torch.tensor(True)
+                # validity = torch.tensor(cam.real_valid)
 
             image_result["img"].append(img)
             validity_list.append(validity)
@@ -71,16 +72,21 @@ def LoadMultiViewImageFromFiles(agent_input,synthetic=False):
 
 
 def _get_bev_feature( agent_input, training: bool=False):
-    synthetic_image_result=LoadMultiViewImageFromFiles(agent_input,synthetic=True)
+
+    add_synthetic_image = False
     real_image_result=LoadMultiViewImageFromFiles(agent_input,synthetic=False)
+
     # if training:
     #     image_result = PhotoMetricDistortionMultiViewImage(image_result)
-    image_result = synthetic_image_result
-    image_result = NormalizeMultiviewImage(image_result)
-    image_result = RandomScaleImageMultiViewImage(image_result)  # 432,768
-    image_result = PadMultiViewImage(image_result)  # 448,768
-    imgs = [img.transpose(2, 0, 1) for img in image_result['img']]
-    synthetic_camera_feature = torch.tensor(np.ascontiguousarray(np.stack(imgs, axis=0)))
+
+    if add_synthetic_image:
+        synthetic_image_result=LoadMultiViewImageFromFiles(agent_input,synthetic=True)
+        image_result = synthetic_image_result
+        image_result = NormalizeMultiviewImage(image_result)
+        image_result = RandomScaleImageMultiViewImage(image_result)  # 432,768
+        image_result = PadMultiViewImage(image_result)  # 448,768
+        imgs = [img.transpose(2, 0, 1) for img in image_result['img']]
+        synthetic_camera_feature = torch.tensor(np.ascontiguousarray(np.stack(imgs, axis=0)))
 
     image_result = real_image_result
     image_result = NormalizeMultiviewImage(image_result)
@@ -90,11 +96,19 @@ def _get_bev_feature( agent_input, training: bool=False):
     real_camera_feature = torch.tensor(np.ascontiguousarray(np.stack(imgs, axis=0)))
 
 
-    features = {"camera_feature": real_camera_feature,
-                "camera_valid":real_image_result["validity"],
-                "rendered_camera_feature":synthetic_camera_feature,
-                "img_shape": torch.FloatTensor(np.stack(real_image_result["img_shape"])),#8,3
-                "lidar2img": torch.FloatTensor(np.stack(real_image_result["lidar2img"]))#8,4,4
-                }
+    if add_synthetic_image:
+        features = {
+            "camera_feature": real_camera_feature,
+            "camera_valid": real_image_result["validity"],
+            "rendered_camera_feature": synthetic_camera_feature,
+            "img_shape": torch.FloatTensor(np.stack(real_image_result["img_shape"])),#8,3
+            "lidar2img": torch.FloatTensor(np.stack(real_image_result["lidar2img"]))#8,4,4
+        }
+    features = {
+        "camera_feature": real_camera_feature,
+        "camera_valid": real_image_result["validity"],
+        "img_shape": torch.FloatTensor(np.stack(real_image_result["img_shape"])),#8,3
+        "lidar2img": torch.FloatTensor(np.stack(real_image_result["lidar2img"]))#8,4,4
+    }
 
     return features

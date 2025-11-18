@@ -4,23 +4,30 @@ import logging
 import pickle
 import gzip
 import os
+import json
+import shutil
 
 import torch
 from tqdm import tqdm
 import numpy as np
-from navsim.common.dataloader import SceneLoader
-from navsim.planning.training.abstract_feature_target_builder import AbstractFeatureBuilder, AbstractTargetBuilder
-import tensorflow as tf
-import shutil
 import cv2
-from scipy.signal import savgol_filter
 
-from waymo_open_dataset import dataset_pb2 as open_dataset
-from waymo_open_dataset.wdl_limited.camera.ops import py_camera_model_ops
-import json
-from waymo_open_dataset.protos import end_to_end_driving_data_pb2 as wod_e2ed_pb2
-from waymo_open_dataset.protos import end_to_end_driving_submission_pb2 as wod_e2ed_submission_pb2
-from navsim.common.dataclasses import AgentInput, EgoStatus, Cameras, Lidar, Camera
+NAVSIM_IMPORTS = True
+WAYMO_IMPORTS = False
+
+if NAVSIM_IMPORTS:
+    from navsim.common.dataloader import SceneLoader
+    from navsim.planning.training.abstract_feature_target_builder import AbstractFeatureBuilder, AbstractTargetBuilder
+    from navsim.common.dataclasses import AgentInput, EgoStatus, Cameras, Lidar, Camera
+
+if WAYMO_IMPORTS:
+    import tensorflow as tf
+    from scipy.signal import savgol_filter
+    from waymo_open_dataset import dataset_pb2 as open_dataset
+    from waymo_open_dataset.wdl_limited.camera.ops import py_camera_model_ops
+    from waymo_open_dataset.protos import end_to_end_driving_data_pb2 as wod_e2ed_pb2
+    from waymo_open_dataset.protos import end_to_end_driving_submission_pb2 as wod_e2ed_submission_pb2
+
 logger = logging.getLogger(__name__)
 
 
@@ -378,6 +385,7 @@ class Dataset(torch.utils.data.Dataset):
                 targets.update(builder.compute_targets(scene))
 
         return (features, targets)
+
 
 class NavsimQADataset(torch.utils.data.Dataset):
     def __init__(
@@ -787,8 +795,6 @@ class WaymoDataset(torch.utils.data.Dataset):
         return len(self.data_loaded)
 
 
-
-
 class WaymoQADataset(torch.utils.data.Dataset):
 
     def __init__(self,
@@ -1013,6 +1019,7 @@ class WaymoQADataset(torch.utils.data.Dataset):
         with open(annotation_path, "w") as f:
             json.dump(annotation, f, indent=2, ensure_ascii=False)
 
+
 def return_cameras(data):
   """Return the front_left, front, and front_right cameras as a list of images"""
   image_list = []
@@ -1106,6 +1113,7 @@ def compute_headings(whole_pos, ref_frame=7,
     heading = heading - heading[ref_frame]
 
     return heading
+
 
 def get_annotation(agent_input, future_trajs,image_save_path):
 
@@ -1211,6 +1219,7 @@ def get_annotation(agent_input, future_trajs,image_save_path):
     }
     return qa_sample
 
+
 def get_qa(agent_input, future_trajs,image_save_path):
     """
     Assemble one training sample for Qwen2.5-VL E2E planner
@@ -1286,7 +1295,6 @@ def get_qa(agent_input, future_trajs,image_save_path):
             {"role": "assistant", "content": ASSISTANT_LABEL}
         ]
     }
-
 
 
 def get_qa_navsim(agent_input, future_trajs,image_save_path):

@@ -18,7 +18,12 @@ class Traj_refiner(nn.Module):
         # if self.init_p:
         #     self.init_feature = nn.Embedding(config.proposal_num, config.tf_d_model)
         if self.traj_bev:
-            self.Bev_refiner=Bev_refiner(config,config.proposal_num,self.poses_num,config.traj_proposal_query)
+            self.Bev_refiner=Bev_refiner(
+                config=config,
+                bev_h=config.proposal_num,
+                bev_w=self.poses_num,
+                proposal_query=config.traj_proposal_query
+            )
 
         self.traj_decoder = MLP(config.tf_d_model, config.tf_d_ffn,  self.state_size)
 
